@@ -11,20 +11,32 @@ export default function LoginPage(){
   const [message,setMessage]=useState('')
   const [loading,setLoading]=useState(false)
   const router=useRouter()
+
   async function submit(e:FormEvent){
     e.preventDefault();setLoading(true);setMessage('')
     const supabase=createClient()
+
     if(mode==='signup'){
-      const {error}=await supabase.auth.signUp({email,password})
+      const emailRedirectTo = `${window.location.origin}/onboarding`
+      const {error}=await supabase.auth.signUp({
+        email,
+        password,
+        options:{emailRedirectTo},
+      })
       if(error) setMessage(error.message)
-      else {setMessage('Compte créé. Vérifie ton e-mail si la confirmation est activée, puis connecte-toi.');setMode('login')}
+      else {
+        setMessage('Compte créé. Vérifie ton e-mail : après confirmation, tu seras redirigé automatiquement vers VentureLink.')
+        setMode('login')
+      }
     } else {
       const {error}=await supabase.auth.signInWithPassword({email,password})
       if(error) setMessage(error.message)
       else router.push('/onboarding')
     }
+
     setLoading(false)
   }
+
   return <main className="auth">
     <section className="card stack">
       <div><span className="badge">VentureLink</span><h1>{mode==='login'?'Connexion':'Créer un compte'}</h1><p className="muted">Accède au réseau startups & investisseurs.</p></div>
